@@ -4,9 +4,15 @@
 #include "InitialConditions/initialcondition.h"
 #include "particle.h"
 
+#include "Potentials/newtoniangravity.h"
+#include "vec3.h"
+
 #include <iostream>
+#include <iomanip>
 using std::cout;
 using std::endl;
+
+
 
 
 
@@ -25,8 +31,18 @@ void System::computeForces() {
      * should convince yourself that this is true before you implement this
      * loop.
      */
+
     resetAllForces();
     m_potential->resetPotentialEnergy();
+
+    //int N = 100;
+    for (int i=0; i < m_numberOfParticles; i++){
+        for (int j = i+1; j < m_numberOfParticles; j++){
+            //Particle *i =
+            m_potential->computeForces(*m_particles.at(i), *m_particles.at(j));
+        }
+    }
+
 }
 
 void System::resetAllForces() {
@@ -82,7 +98,17 @@ double System::computeKineticEnergy() {
      * Remember also that the Particle class has a built in method
      * Particle::velocitySquared which can be used here.
      */
+
     m_kineticEnergy = 0;
+    for (int i = 0; i < m_numberOfParticles; i++){ //2 = antall partikler
+        //addParticle(Particle* i);
+        Particle* p = m_particles.at(i);
+        double mass = p->getMass();
+//        vec3 v = p->getVelocity();
+        m_kineticEnergy += 0.5*mass*p->velocitySquared();
+    }
+
+    //m_kineticEnergy = 0;
     return m_kineticEnergy;
 }
 
@@ -134,7 +160,7 @@ void System::setFileWriting(bool writeToFile) {
 
 void System::writePositionsToFile() {
     if (m_outFileOpen == false) {
-        m_outFile.open("positions.dat", std::ios::out);
+        m_outFile.open(m_filename, std::ios::out);
         m_outFileOpen = true;
     }
     /*
@@ -145,6 +171,15 @@ void System::writePositionsToFile() {
      *
      * Which format you choose for the data file is up to you.
      */
+
+    for (int i=0; i<m_numberOfParticles; i++){
+        Particle* p = m_particles.at(i);
+        vec3 position_p = p->getPosition();
+        double x = position_p.x();
+        double y = position_p.y();
+        //m_outFile << m_numberOfParticles << endl;
+        m_outFile << x << " " << y << endl;
+    }
 }
 
 void System::closeOutFile() {

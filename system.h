@@ -2,6 +2,7 @@
 #include "particle.h"
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 class System {
 private:
@@ -17,6 +18,7 @@ private:
     class InitialCondition*     m_initialCondition  = nullptr;
     std::ofstream               m_outFile;
     std::vector<Particle*>      m_particles;
+    std::string                 m_filename;
 
 public:
     System() {}
@@ -34,5 +36,6 @@ public:
     void writePositionsToFile   ();
     void closeOutFile           ();
     double computeKineticEnergy ();
+    void setFileName            (std::string filename) {m_filename = filename;}
 };
 
