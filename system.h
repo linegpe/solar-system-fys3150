@@ -37,5 +37,6 @@ public:
     void closeOutFile           ();
     double computeKineticEnergy ();
     void setFileName            (std::string filename) {m_filename = filename;}
+    void perihelion             (int numberOfTimeSteps);
 };
 

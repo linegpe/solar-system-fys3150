@@ -16,13 +16,13 @@ void VelocityVerlet::integrateOneStep(std::vector<Particle*> particles) {
     double dtOver2 = m_dt/2;
     for (int i=0; i<particles.size(); i++){
         Particle *p = particles.at(i);
-        //vec3 F = p->getForce();
 
         vec3 acceleration = p->getForce()/p->getMass();
-        p->getPosition() += m_dt*p->getVelocity() + dt2*acceleration;
+        p->getPosition() += m_dt*p->getVelocity() + dt2*acceleration*0.5;
+        m_system->computeForces();
         vec3 new_acceleration = p->getForce()/p->getMass();
         p->getVelocity() += dtOver2*(acceleration + new_acceleration);
     }
-
-
 }
+
+

@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
-
+DEFINES += CATCH_CONFIG_MAIN
 SOURCES += main.cpp \
     vec3.cpp \
     system.cpp \
@@ -42,4 +42,5 @@ HEADERS += \
     InitialConditions/planetary.h \
     InitialConditions/earthmoon.h \
     Potentials/relativisticgravity.h \
-    InitialConditions/relativistic.h
+    InitialConditions/relativistic.h \
+    catch.hpp

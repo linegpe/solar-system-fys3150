@@ -58,7 +58,7 @@ void NewtonianGravity::computeForces(Particle& a, Particle& b) {
 
     //double V = 1.0;
 
-    m_potentialEnergy += mass_a*mass_b*G/(r*r);
+    m_potentialEnergy += mass_a*mass_b*G/r;
     //m_potentialEnergy += V;
 
 }

@@ -9,8 +9,10 @@
 
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 using std::cout;
 using std::endl;
+using std::setprecision;
 
 
 
@@ -35,14 +37,11 @@ void System::computeForces() {
     resetAllForces();
     m_potential->resetPotentialEnergy();
 
-    //int N = 100;
     for (int i=0; i < m_numberOfParticles; i++){
         for (int j = i+1; j < m_numberOfParticles; j++){
-            //Particle *i =
             m_potential->computeForces(*m_particles.at(i), *m_particles.at(j));
         }
     }
-
 }
 
 void System::resetAllForces() {
@@ -100,7 +99,7 @@ double System::computeKineticEnergy() {
      */
 
     m_kineticEnergy = 0;
-    for (int i = 0; i < m_numberOfParticles; i++){ //2 = antall partikler
+    for (int i = 0; i < m_numberOfParticles; i++){
         //addParticle(Particle* i);
         Particle* p = m_particles.at(i);
         double mass = p->getMass();
@@ -178,7 +177,7 @@ void System::writePositionsToFile() {
         double x = position_p.x();
         double y = position_p.y();
         //m_outFile << m_numberOfParticles << endl;
-        m_outFile << x << " " << y << endl;
+        m_outFile << setprecision(15) << x << " " << y << endl;
     }
 }
 
@@ -187,6 +186,53 @@ void System::closeOutFile() {
         m_outFile.close();
         m_outFileOpen = false;
     }
+}
+
+void System::perihelion(int numberOfTimeSteps){
+// Set some helper variables before we start the time integration.
+double thetaPrevious        = 0;	// The perihelion angle of the previous time step.
+double thetaCurrent 		= 0;	// The perihelion angle of the current time step.
+
+double rPreviousPrevious 	= 0;	// Mercury-Sun-distance two times steps ago.
+double rPrevious            = 0;	// Mercury-Sun-distance of the previous time step.
+double rCurrent             = 0;	// Mercury-Sun-distance of the current time step.
+
+m_outFile.open("perihelion.dat");
+// This is the integration loop, in which you advance the solution (usually via a integrateOneStep()
+// function located in an integrator object, e.g. the Verlet class).
+for (int timeStep = 0; timeStep < numberOfTimeSteps; timeStep++) {
+
+    // Integrate the solution one step forward in time, using the GR corrected force calcuation
+    // and the Verlet algorithm.
+    m_integrator->integrateOneStep(m_particles);
+
+    // Compute the current perihelion angle, using the inverse tangent function from cmath.
+    // This assumes there is a vector of planets, called m_particles, available, in which the
+    // Sun is m_particles[0] and Mercury is m_particles[1].
+    double x = m_particles[1]->getPosition().x() - m_particles[0]->getPosition().x();
+    double y = m_particles[1]->getPosition().y() - m_particles[0]->getPosition().y();
+    thetaCurrent = atan2( y, x );
+
+    // Compute the current Mercury-Sun distance.
+    double rCurrent = (m_particles[1]->getPosition() - m_particles[0]->getPosition()).length();
+
+    // Check if the *previous* time step was a minimum for the Mercury-Sun distance. I.e. check
+    // if the previous distance is smaller than the current one *and* the previous previous one.
+    //cout << rCurrent << endl;
+    if ( rCurrent > rPrevious && rPrevious < rPreviousPrevious ) {
+
+        // If we are perihelion, print angle (in radians) to terminal.
+        m_outFile << thetaPrevious << endl;
+
+        // Here you should also probably write it to file for later plotting or something.
+    }
+
+    // Update the helper variables (current, previous, previousPrevious).
+    rPreviousPrevious 	= rPrevious;
+    rPrevious           = rCurrent;
+    thetaPrevious		= thetaCurrent;
+}
+m_outFile.close();
 }
 
 
